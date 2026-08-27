@@ -1,0 +1,44 @@
+HTML
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>姿勢・重心ビューワー</title>
+<style>
+body{margin:0;padding:20px;background:#111;color:#fff;font-family:sans-serif;text-align:center}
+h1{font-size:22px}
+video{width:100%;max-width:600px;border-radius:12px;background:#000}
+button{margin:20px;padding:14px 30px;font-size:18px;border:0;border-radius:10px}
+</style>
+</head>
+<body>
+
+<h1>姿勢・重心ビューワー</h1>
+
+<video id="camera" autoplay playsinline muted></video>
+
+<br>
+
+<button onclick="startCamera()">カメラを起動</button>
+
+<p id="status">カメラ待機中</p>
+
+<script>
+async function startCamera(){
+try{
+const stream=await navigator.mediaDevices.getUserMedia({
+video:{facingMode:"environment"},
+audio:false
+});
+document.getElementById("camera").srcObject=stream;
+document.getElementById("status").textContent="カメラ起動中";
+}catch(error){
+document.getElementById("status").textContent="カメラを起動できませんでした";
+alert("カメラへのアクセスを許可してください");
+}
+}
+</script>
+
+</body>
+</html>
