@@ -129,10 +129,12 @@
   }
 
   startButton.addEventListener("click", startCamera);
-  let lastVideoTime = -1;
+    let lastVideoTime = -1;
 
   function detectPose() {
-    if (!running || !poseLandmarker) return;
+    if (!running || !poseLandmarker) {
+      return;
+    }
 
     if (
       video.readyState >= 2 &&
@@ -156,24 +158,18 @@
         results.landmarks &&
         results.landmarks.length > 0
       ) {
-        const drawingUtils = new DrawingUtils(ctx);
+        const landmarks = results.landmarks[0];
 
-        drawingUtils.drawConnectors(
-          results.landmarks[0],
-          PoseLandmarker.POSE_CONNECTIONS,
-          {
-            color: "#00ff00",
-            lineWidth: 4
-          }
-        );
+        ctx.fillStyle = "#ff0000";
 
-        drawingUtils.drawLandmarks(
-          results.landmarks[0],
-          {
-            color: "#ff0000",
-            radius: 5
-          }
-        );
+        for (const point of landmarks) {
+          const x = point.x * canvas.width;
+          const y = point.y * canvas.height;
+
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
         status.textContent =
           "人体を認識しています";
@@ -182,6 +178,7 @@
 
     requestAnimationFrame(detectPose);
   }
+
 </script>
 
 </body>
