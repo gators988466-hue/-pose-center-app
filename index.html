@@ -5,126 +5,116 @@ HTML
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>姿勢・重心ビューワー</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 </head>
-  
+HTML
 <body>
+
   <h1>姿勢・重心ビューワー</h1>
 
-  <div>
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas"></canvas>
-  </div>
+HTML
+<video id="video" autoplay playsinline></video>
 
-  <button id="startButton">カメラを起動</button>
+<br>
 
-  <p id="status">カメラを起動してください</p>
+<button id="startButton">カメラを起動</button>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-      font-family: sans-serif;
-      background: #f5f5f5;
-    }
-
-    video, canvas {
-      width: 100%;
-      max-width: 600px;
-      border-radius: 12px;
-    }
-
-    #canvas {
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 12px 24px;
-      font-size: 18px;
-    }
-  </style>
-  HTML
-  <script>
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const startButton = document.getElementById("startButton");
-const status = document.getElementById("status");
-    HTML
-    const pose = new Pose({
-  locateFile: (file) =>
-    `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
-});
-
-pose.setOptions({
-  modelComplexity: 1,
-  smoothLandmarks: true,
-  enableSegmentation: false,
-  minDetectionConfidence: 0.5,
-  minTrackingConfidence: 0.5
-  HTML
-  pose.onResults((results) => {
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  if (results.poseLandmarks) {
-    drawConnectors(
-      ctx,
-      results.poseLandmarks,
-      POSE_CONNECTIONS,
-      { color: "#00FF00", lineWidth: 4 }
-    );
-
-    drawLandmarks(
-      ctx,
-      results.poseLandmarks,
-      { color: "#FF0000", lineWidth: 2, radius: 5 }
-    );
+<p id="status">カメラを起動してください</p>
+HTML
+<canvas id="canvas"></canvas>
+HTML
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    font-family: sans-serif;
+    background: #f5f5f5;
   }
-});
-});
-    HTML
+
+  video {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 12px;
+  }
+
+  button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 18px;
+  }
+</style>
+HTML
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+HTML
+<script>
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const startButton = document.getElementById("startButton");
+  const status = document.getElementById("status");
+
+  const pose = new Pose({
+    locateFile: (file) =>
+      `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+  });
+
+  pose.setOptions({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+  });
+  HTML
+    pose.onResults((results) => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (results.poseLandmarks) {
+      drawConnectors(
+        ctx,
+        results.poseLandmarks,
+        POSE_CONNECTIONS,
+        { color: "#00FF00", lineWidth: 4 }
+      );
+
+      drawLandmarks(
+        ctx,
+        results.poseLandmarks,
+        { color: "#FF0000", lineWidth: 2, radius: 5 }
+      );
+    }
+  });
+  HTML
     startButton.addEventListener("click", async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: "user"
-      },
-      audio: false
-    });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false
+      });
 
-    video.srcObject = stream;
+      video.srcObject = stream;
+      await video.play();
 
-    await video.play();
-
-    status.textContent = "カメラ起動中";
-  } catch (error) {
-    status.textContent = "カメラを起動できませんでした";
-    console.error(error);
+      status.textContent = "カメラ起動中";
+    } catch (error) {
+      status.textContent = "カメラを起動できませんでした";
+      console.error(error);
+    }
+  });
+HTML
+  async function processVideo() {
+    if (video.readyState >= 2) {
+      await pose.send({ image: video });
+    }
+    requestAnimationFrame(processVideo);
   }
-});
-    HTML
-    const camera = new Camera(video, {
-  onFrame: async () => {
-    await pose.send({ image: video });
-  },
-  width: 640,
-  height: 480
-});
-    HTML
-    camera.start();
 
+  video.addEventListener("playing", processVideo);
+HTML
 </script>
 
 </body>
