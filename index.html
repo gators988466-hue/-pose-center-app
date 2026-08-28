@@ -1,4 +1,3 @@
-HTML
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,12 +5,12 @@ HTML
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>姿勢・重心ビューワー</title>
 </head>
-HTML
+
 <body>
 
   <h1>姿勢・重心ビューワー</h1>
 
-HTML
+
 <video id="video" autoplay playsinline></video>
 
 <br>
@@ -19,9 +18,9 @@ HTML
 <button id="startButton">カメラを起動</button>
 
 <p id="status">カメラを起動してください</p>
-HTML
+
 <canvas id="canvas"></canvas>
-HTML
+
 <style>
   body {
     margin: 0;
@@ -43,10 +42,10 @@ HTML
     font-size: 18px;
   }
 </style>
-HTML
+
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-HTML
+
 <script>
   const video = document.getElementById("video");
   const canvas = document.getElementById("canvas");
@@ -65,8 +64,7 @@ HTML
     enableSegmentation: false,
     minDetectionConfidence: 0.5,
     minTrackingConfidence: 0.5
-  });
-  HTML
+  
     pose.onResults((results) => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -88,7 +86,7 @@ HTML
       );
     }
   });
-  HTML
+  
     startButton.addEventListener("click", async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -105,7 +103,7 @@ HTML
       console.error(error);
     }
   });
-HTML
+
   async function processVideo() {
     if (video.readyState >= 2) {
       await pose.send({ image: video });
@@ -114,7 +112,6 @@ HTML
   }
 
   video.addEventListener("playing", processVideo);
-HTML
 </script>
 
 </body>
