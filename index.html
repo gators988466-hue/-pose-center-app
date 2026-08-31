@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>姿勢・重心ビューワー</title>
 </head>
+
+<body>
+
+  <h1>姿勢・重心ビューワー</h1>
+
+  <div class="camera-container">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <button id="startButton">カメラを起動</button>
+
+  <p id="status">カメラを起動してください</p>
 <style>
   body {
     margin: 0;
@@ -72,8 +85,8 @@
 
   let poseLandmarker = null;
   let running = false;
-
-  async function createPoseLandmarker() {
+  let lastVideoTime = -1;
+    async function createPoseLandmarker() {
     status.textContent = "人体認識を準備しています...";
 
     const vision = await FilesetResolver.forVisionTasks(
@@ -91,8 +104,10 @@
         numPoses: 1
       }
     );
+
+    status.textContent = "人体認識の準備完了";
   }
-  async function startCamera() {
+    async function startCamera() {
     try {
       status.textContent = "カメラを起動しています...";
 
@@ -106,6 +121,7 @@
       });
 
       video.srcObject = stream;
+
       await video.play();
 
       canvas.width = video.videoWidth;
@@ -129,17 +145,12 @@
   }
 
   startButton.addEventListener("click", startCamera);
-    let lastVideoTime = -1;
+    function detectPose() {
+    if (!running || !poseLandmarker) return;
 
-  function detectPose() {
-    if (!running || !poseLandmarker) {
-      return;
-    }
+    if (video.readyState >= 2 &&
+        video.currentTime !== lastVideoTime) {
 
-    if (
-      video.readyState >= 2 &&
-      video.currentTime !== lastVideoTime
-    ) {
       lastVideoTime = video.currentTime;
 
       const results = poseLandmarker.detectForVideo(
@@ -154,13 +165,12 @@
         canvas.height
       );
 
-      if (
-        results.landmarks &&
-        results.landmarks.length > 0
-      ) {
+      if (results.landmarks &&
+          results.landmarks.length > 0) {
+
         const landmarks = results.landmarks[0];
 
-        ctx.fillStyle = "#ff0000";
+        ctx.fillStyle = "red";
 
         for (const point of landmarks) {
           const x = point.x * canvas.width;
@@ -178,8 +188,7 @@
 
     requestAnimationFrame(detectPose);
   }
-
-</script>
+  </script>
 
 </body>
 </html>
