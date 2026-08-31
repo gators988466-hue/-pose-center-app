@@ -107,25 +107,32 @@
 
     status.textContent = "人体認識の準備完了";
   }
-    async function startCamera() {
+      async function startCamera() {
     try {
       status.textContent = "カメラを起動しています...";
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "user",
-          width: { ideal: 640 },
-          height: { ideal: 480 }
-        },
-        audio: false
-      });
+      if (!navigator.mediaDevices ||
+          !navigator.mediaDevices.getUserMedia) {
+        throw new Error("このブラウザではカメラを利用できません");
+      }
+
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
 
       video.srcObject = stream;
 
-      await video.play();
+      await new Promise((resolve) => {
+        video.onloadedmetadata = resolve;
+      });
 
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
+
+      status.textContent =
+        "カメラ起動成功。人体認識を準備しています...";
 
       await createPoseLandmarker();
 
@@ -140,11 +147,15 @@
       console.error(error);
 
       status.textContent =
-        "起動できませんでした: " + error.message;
+        "カメラを起動できませんでした: " +
+        error.message;
     }
   }
 
-  startButton.addEventListener("click", startCamera);
+  startButton.addEventListener(
+    "click",
+    startCamera
+  );
     function detectPose() {
     if (!running || !poseLandmarker) return;
 
